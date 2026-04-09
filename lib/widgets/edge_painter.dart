@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/quest_models.dart';
+import '../theme/quest_theme.dart';
 
 class EdgePainter extends CustomPainter {
   final List<QuestNode> nodes;
@@ -14,27 +15,34 @@ class EdgePainter extends CustomPainter {
       final to = nodes.where((n) => n.id == edge.toNodeId).firstOrNull;
       if (from == null || to == null) continue;
 
-      final start = Offset(from.x + 80, from.y + 30);
-      final end = Offset(to.x + 80, to.y + 30);
+      final start = Offset(from.x + 160, from.y + 40); // Right side
+      final end = Offset(to.x, to.y + 40); // Left side
 
-      final paint = Paint()..color = Colors.white38..strokeWidth = 2..style = PaintingStyle.stroke;
+      final paint = Paint()
+        ..color = QuestTheme.neonBlue.withOpacity(0.5)
+        ..strokeWidth = 2
+        ..style = PaintingStyle.stroke;
+
       final path = Path()..moveTo(start.dx, start.dy);
-      final midY = (start.dy + end.dy) / 2;
-      path.cubicTo(start.dx, midY, end.dx, midY, end.dx, end.dy);
-      canvas.drawPath(path, paint);
+      final controlPoint1 = Offset(start.dx + 50, start.dy);
+      final controlPoint2 = Offset(end.dx - 50, end.dy);
+      path.cubicTo(controlPoint1.dx, controlPoint1.dy, controlPoint2.dx, controlPoint2.dy, end.dx, end.dy);
+      
+      // Draw glow
+      canvas.drawPath(path, paint..strokeWidth = 4..color = QuestTheme.neonBlue.withOpacity(0.1));
+      canvas.drawPath(path, paint..strokeWidth = 2..color = QuestTheme.neonBlue.withOpacity(0.5));
 
       // Arrowhead
-      final dir = (end - Offset(end.dx, midY)).direction;
-      final arrowPaint = Paint()..color = Colors.white38..style = PaintingStyle.fill;
+      final arrowPaint = Paint()..color = QuestTheme.neonBlue.withOpacity(0.7)..style = PaintingStyle.fill;
       final arrowPath = Path();
       arrowPath.moveTo(end.dx, end.dy);
-      arrowPath.lineTo(end.dx - 8 * (end.dx > start.dx ? 1 : -1), end.dy - 8);
-      arrowPath.lineTo(end.dx + 8 * (end.dx > start.dx ? 1 : -1), end.dy - 8);
+      arrowPath.lineTo(end.dx - 10, end.dy - 6);
+      arrowPath.lineTo(end.dx - 10, end.dy + 6);
       arrowPath.close();
       canvas.drawPath(arrowPath, arrowPaint);
     }
   }
 
   @override
-  bool shouldRepaint(covariant EdgePainter old) => true;
+  bool shouldRepaint(covariant EdgePainter oldDelegate) => true;
 }

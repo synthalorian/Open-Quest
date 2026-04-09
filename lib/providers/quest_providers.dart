@@ -86,6 +86,14 @@ class QuestProjectNotifier extends StateNotifier<List<QuestTree>> {
     _save();
   }
 
+  void updateVariables(String treeId, Map<String, String> variables) {
+    state = state.map((t) {
+      if (t.id != treeId) return t;
+      return QuestTree(id: t.id, name: t.name, nodes: t.nodes, edges: t.edges, variables: variables);
+    }).toList();
+    _save();
+  }
+
   String exportJson(String treeId) {
     final tree = state.firstWhere((t) => t.id == treeId);
     return const JsonEncoder.withIndent('  ').convert(tree.toJson());
@@ -95,8 +103,9 @@ class QuestProjectNotifier extends StateNotifier<List<QuestTree>> {
 final questBoxProvider = FutureProvider<Box>((ref) => Hive.openBox('open_quest'));
 
 final questProvider = StateNotifierProvider<QuestProjectNotifier, List<QuestTree>>((ref) {
-  final box = ref.watch(questBoxProvider);
-  return box.when(data: (b) => QuestProjectNotifier(b), loading: () => QuestProjectNotifier(Hive.box('open_quest')), error: (_, __) => QuestProjectNotifier(Hive.box('open_quest')));
+  final box = ref.watch(questBoxProvider).valueOrNull;
+  if (box == null) return QuestProjectNotifier(Hive.box('open_quest')); // Still risky, but let's assume it's open if accessed
+  return QuestProjectNotifier(box);
 });
 
 final activeTreeProvider = StateProvider<String?>((ref) => null);

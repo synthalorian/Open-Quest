@@ -12,48 +12,71 @@ class ProjectListScreen extends ConsumerWidget {
     final trees = ref.watch(questProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Row(mainAxisSize: MainAxisSize.min, children: [
-        Text('Open', style: TextStyle(color: QuestTheme.green)),
-        const Text('Quest'),
+      appBar: AppBar(title: const Row(mainAxisSize: MainAxisSize.min, children: [
+        Text('OPEN', style: TextStyle(color: QuestTheme.neonPink, letterSpacing: 2)),
+        Text('QUEST', style: TextStyle(color: QuestTheme.neonBlue, letterSpacing: 2)),
       ])),
       body: trees.isEmpty
-        ? Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Icon(Icons.account_tree, size: 64, color: Colors.white24),
-            const SizedBox(height: 16),
-            const Text('No quest trees yet', style: TextStyle(color: Colors.white38)),
+        ? const Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Icon(Icons.grid_4x4, size: 64, color: Colors.white12),
+            SizedBox(height: 16),
+            Text('NEON GRID EMPTY', style: TextStyle(color: Colors.white24, letterSpacing: 1.2)),
           ]))
         : ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(24),
             itemCount: trees.length,
             itemBuilder: (_, i) {
               final tree = trees[i];
-              return Card(
-                color: QuestTheme.card,
-                margin: const EdgeInsets.only(bottom: 12),
+              return Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: QuestTheme.card,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white12),
+                ),
                 child: ListTile(
-                  leading: Icon(Icons.account_tree, color: QuestTheme.green),
-                  title: Text(tree.name, style: const TextStyle(color: Colors.white)),
-                  subtitle: Text('${tree.nodes.length} nodes, ${tree.edges.length} edges', style: const TextStyle(color: Colors.white38, fontSize: 12)),
-                  trailing: IconButton(icon: const Icon(Icons.delete_outline, color: Colors.white24), onPressed: () => ref.read(questProvider.notifier).deleteTree(tree.id)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  leading: const Icon(Icons.hub_outlined, color: QuestTheme.neonBlue),
+                  title: Text(tree.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  subtitle: Text('${tree.nodes.length} NODES // ${tree.edges.length} EDGES', 
+                    style: const TextStyle(color: Colors.white38, fontSize: 10, letterSpacing: 1.1)),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete_sweep_outlined, color: Colors.white24), 
+                    onPressed: () => ref.read(questProvider.notifier).deleteTree(tree.id)
+                  ),
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CanvasScreen(treeId: tree.id))),
                 ),
               );
             },
           ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           final ctrl = TextEditingController();
           showDialog(context: context, builder: (_) => AlertDialog(
             backgroundColor: QuestTheme.card,
-            title: const Text('New Quest Tree'),
-            content: TextField(controller: ctrl, autofocus: true, decoration: const InputDecoration(hintText: 'Name...'), style: const TextStyle(color: Colors.white)),
+            title: const Text('NEW PROJECT'),
+            content: TextField(
+              controller: ctrl, 
+              autofocus: true, 
+              decoration: const InputDecoration(labelText: 'Project Name'),
+              style: const TextStyle(color: Colors.white)
+            ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-              TextButton(onPressed: () { if (ctrl.text.trim().isNotEmpty) { ref.read(questProvider.notifier).addTree(ctrl.text.trim()); Navigator.pop(context); } }, child: Text('Create', style: TextStyle(color: QuestTheme.green))),
+              TextButton(onPressed: () => Navigator.pop(context), child: const Text('CANCEL', style: TextStyle(color: Colors.white38))),
+              TextButton(
+                onPressed: () { 
+                  if (ctrl.text.trim().isNotEmpty) { 
+                    ref.read(questProvider.notifier).addTree(ctrl.text.trim()); 
+                    Navigator.pop(context); 
+                  } 
+                }, 
+                child: const Text('INITIALIZE', style: TextStyle(color: QuestTheme.neonPink, fontWeight: FontWeight.bold))
+              ),
             ],
           ));
         },
-        child: const Icon(Icons.add),
+        label: const Text('INITIALIZE GRID'),
+        icon: const Icon(Icons.add),
       ),
     );
   }
